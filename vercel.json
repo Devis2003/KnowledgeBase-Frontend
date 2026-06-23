@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/:path*", "destination": "http://13.232.255.159:8080/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
