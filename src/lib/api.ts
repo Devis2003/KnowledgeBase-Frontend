@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import type { Article, ArticleRequest, AuthResponse, User } from '@/types'
 
-const BASE_URL = '/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -56,7 +56,7 @@ api.interceptors.response.use(
   (res) => res,
   async (error: AxiosError) => {
     const original = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
-    if (error.response?.status === 403 && !original._retry && refreshToken) {
+    if (error.response?.status === 401 && !original._retry && refreshToken) {
       original._retry = true
       refreshPromise ??= refreshAccessToken().finally(() => {
         refreshPromise = null
@@ -156,5 +156,13 @@ export async function deleteArticle(id: number) {
 
 export async function getAdminArticles() {
   const { data } = await api.get<Article[]>('/admin/articles')
+  return data
+}
+
+export async function getPresignedUploadUrl(fileName: string, contentType: string) {
+  const { data } = await api.post('/articles/images/presigned-url', {
+    fileName,
+    contentType,
+  })
   return data
 }
